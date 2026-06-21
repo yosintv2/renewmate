@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Bell,
-  FileText,
   Settings,
   Shield,
   LogOut,
@@ -111,7 +110,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       badge: alertCount > 0 ? String(alertCount) : undefined,
       badgeVariant: "alert",
     },
-    { href: "/dashboard/documents", label: "Documents", icon: FileText },
     { href: "/dashboard/settings", label: "Settings", icon: Settings },
   ];
 
@@ -130,7 +128,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             <Shield className="w-4 h-4 text-white" />
           </div>
           <span className="text-gray-900">
-            Sub<span className="text-blue-600">Track</span>
+            Renew<span className="text-blue-600">Mate</span>
           </span>
         </Link>
         <button

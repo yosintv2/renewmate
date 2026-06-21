@@ -284,7 +284,7 @@ function AddDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-sm sm:max-w-md mx-auto max-h-[90vh] flex flex-col gap-0 p-0 overflow-hidden">
+      <DialogContent showCloseButton={false} className="w-full max-w-sm sm:max-w-md mx-auto max-h-[90vh] flex flex-col gap-0 p-0 overflow-hidden">
         {/* Header */}
         <div className="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-gray-100 flex-shrink-0">
           {(step > 1 && !editItem) && (

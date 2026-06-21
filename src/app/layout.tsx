@@ -13,21 +13,25 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RenewMate — Never Miss a Renewal",
+  title: "RenewMate — Never Miss a Subscription Payment",
   description:
-    "Nepal's #1 vehicle renewal reminder platform. Track vehicle tax, bluebook, insurance, and pollution test dates. Get timely reminders and store documents securely.",
+    "Track every subscription, bill, rent, and financial liability in one place. Get reminded before payments hit — Netflix, Spotify, rent, credit cards, BNPL, and more. Free forever.",
   keywords: [
-    "vehicle tax reminder Nepal",
-    "bluebook renewal Nepal",
-    "vehicle insurance Nepal",
-    "pollution test Nepal",
-    "bike tax Nepal",
-    "car tax Nepal",
+    "subscription tracker",
+    "bill reminder app",
+    "subscription management",
+    "recurring payment tracker",
+    "Netflix reminder",
+    "subscription cost tracker",
+    "monthly bill tracker",
+    "BNPL tracker",
+    "credit card payment reminder",
+    "rent reminder",
   ],
   openGraph: {
-    title: "RenewMate — Never Miss a Renewal",
+    title: "RenewMate — Never Miss a Subscription Payment",
     description:
-      "Track vehicle tax, bluebook, insurance, and pollution test renewals. Built for Nepal.",
+      "Track every subscription, bill, and recurring payment. Get reminded before they charge. Free forever.",
     type: "website",
   },
 };

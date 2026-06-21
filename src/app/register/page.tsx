@@ -9,10 +9,10 @@ import { Shield, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const benefits = [
-  "Track vehicle tax, bluebook, insurance & pollution test",
-  "Get reminders 30 days before every renewal",
-  "Store documents securely in the cloud",
-  "Free for up to 2 vehicles — forever",
+  "Track subscriptions, bills, rent, and financial liabilities",
+  "Get reminders 30, 15, 7, 3, and 1 day before every payment",
+  "See your monthly and yearly spend breakdown by category",
+  "100% free — no limits, no credit card required",
 ];
 
 export default function RegisterPage() {
@@ -89,10 +89,10 @@ export default function RegisterPage() {
         </Link>
         <div>
           <h2 className="text-4xl font-bold text-white mb-4 leading-tight">
-            Never miss a vehicle renewal again.
+            Never miss a subscription payment again.
           </h2>
           <p className="text-blue-200 text-lg mb-8">
-            Join 2,000+ Nepal vehicle owners who rely on RenewMate to stay on top of deadlines.
+            Join thousands who use RenewMate to stay on top of every recurring payment and bill.
           </p>
           <ul className="space-y-4">
             {benefits.map((b) => (
@@ -103,7 +103,7 @@ export default function RegisterPage() {
             ))}
           </ul>
         </div>
-        <p className="text-blue-300 text-sm">Built with care in Nepal 🇳🇵</p>
+        <p className="text-blue-300 text-sm">Free for everyone, forever.</p>
       </div>
 
       {/* Right panel */}
@@ -119,7 +119,7 @@ export default function RegisterPage() {
           </div>
 
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Create your free account</h1>
-          <p className="text-gray-500 text-sm mb-8">No credit card required. Up to 2 vehicles free.</p>
+          <p className="text-gray-500 text-sm mb-8">No credit card required. Free forever, no limits.</p>
 
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
             {error && (

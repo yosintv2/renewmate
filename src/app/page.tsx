@@ -4,175 +4,127 @@ import HeroCTAButtons from "@/components/HeroCTAButtons";
 import Link from "next/link";
 import {
   Bell,
-  FileText,
   LayoutDashboard,
   Shield,
   CheckCircle2,
   ArrowRight,
-  Car,
-  Bike,
-  Truck,
-  AlertTriangle,
-  Clock,
+  CreditCard,
+  Zap,
+  Globe,
   ChevronDown,
   Star,
-  Zap,
-  Users,
   BookOpen,
+  Repeat2,
+  WalletCards,
+  TrendingDown,
 } from "lucide-react";
 import { blogPosts } from "@/lib/blog";
 
 const features = [
   {
     icon: Bell,
-    title: "Smart Renewal Reminders",
+    title: "Smart Payment Reminders",
     description:
-      "Get notified 30, 15, 7, 3, and 1 day before every renewal via email, push notification, or Telegram.",
+      "Get notified 30, 15, 7, 3, and 1 day before every subscription or bill charges. Never get surprised by a payment again.",
     gradient: "from-blue-500 to-blue-700",
-    bg: "bg-blue-50",
   },
   {
     icon: LayoutDashboard,
-    title: "Unified Dashboard",
+    title: "All-in-One Dashboard",
     description:
-      "See all vehicles and their renewal status at a glance — expired, expiring soon, and all clear.",
-    gradient: "from-green-500 to-emerald-700",
-    bg: "bg-green-50",
-  },
-  {
-    icon: FileText,
-    title: "Document Vault",
-    description:
-      "Store bluebook, insurance, and pollution certificates securely in the cloud. Access anytime, anywhere.",
+      "See every subscription, bill, and liability at a glance — what's due, what's overdue, and your total monthly spend.",
     gradient: "from-purple-500 to-violet-700",
-    bg: "bg-purple-50",
   },
   {
-    icon: Shield,
-    title: "Track All 4 Renewals",
+    icon: WalletCards,
+    title: "5 Tracking Categories",
     description:
-      "Vehicle tax, bluebook, insurance, and pollution test — all tracked in one place, nothing falls through the cracks.",
-    gradient: "from-orange-500 to-red-600",
-    bg: "bg-orange-50",
+      "Entertainment, Living Essentials, Tech & Tools, Lifestyle, and Financial Liabilities — every payable tracked in one place.",
+    gradient: "from-green-500 to-emerald-700",
   },
   {
-    icon: Car,
-    title: "Multi-Vehicle Support",
+    icon: Globe,
+    title: "Multi-Currency Support",
     description:
-      "Manage your entire household fleet from one account. Add bikes, cars, jeeps, vans, or trucks.",
+      "Use any of 34 currencies. Switch anytime — USD, EUR, INR, NPR, GBP, SGD, and more. Your currency, your way.",
+    gradient: "from-orange-500 to-amber-600",
+  },
+  {
+    icon: TrendingDown,
+    title: "Spend Breakdown",
+    description:
+      "See exactly how much you're spending per category each month and year. Spot subscriptions you've forgotten about.",
     gradient: "from-red-500 to-pink-600",
-    bg: "bg-red-50",
   },
   {
     icon: Zap,
-    title: "Fleet Management",
+    title: "Mobile-First Design",
     description:
-      "Built for taxi operators, delivery companies, and schools. Fleet-wide reports and never let a vehicle go overdue.",
+      "Built for your phone. Add a subscription in seconds, check what's due today, and manage everything on the go.",
     gradient: "from-yellow-500 to-amber-600",
-    bg: "bg-yellow-50",
   },
 ];
 
-const plans = [
-  {
-    name: "Free",
-    price: "Free",
-    period: "",
-    description: "Perfect for individual owners getting started.",
-    features: ["Up to 2 vehicles", "Basic renewal reminders", "Email notifications", "Web dashboard"],
-    cta: "Get started free",
-    href: "/register",
-    highlight: false,
-  },
-  {
-    name: "Premium",
-    price: "Rs. 99",
-    period: "/month",
-    annualNote: "or Rs. 999/year (save 16%)",
-    description: "For serious owners who want full control.",
-    features: [
-      "Unlimited vehicles",
-      "Push notifications",
-      "Telegram notifications",
-      "Document vault",
-      "Priority reminders",
-      "Renewal history",
-    ],
-    cta: "Start Premium",
-    href: "/register?plan=premium",
-    highlight: true,
-  },
-  {
-    name: "Fleet",
-    price: "Rs. 999",
-    period: "/month",
-    description: "For businesses managing multiple vehicles.",
-    features: [
-      "Unlimited vehicles",
-      "Fleet dashboard",
-      "Monthly reports",
-      "Team member access",
-      "Priority support",
-      "All Premium features",
-    ],
-    cta: "Contact sales",
-    href: "/contact",
-    highlight: false,
-  },
+const categories = [
+  { label: "Entertainment", examples: "Netflix, Spotify, Crunchyroll", color: "bg-purple-100 text-purple-700 border-purple-200" },
+  { label: "Living Essentials", examples: "Rent, Electricity, Water", color: "bg-green-100 text-green-700 border-green-200" },
+  { label: "Tech & Tools", examples: "iCloud, ChatGPT Plus, Notion", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  { label: "Lifestyle", examples: "Gym, Fashion Box, Gaming", color: "bg-orange-100 text-orange-700 border-orange-200" },
+  { label: "Financial Liabilities", examples: "Credit Cards, BNPL, Loan EMI", color: "bg-red-100 text-red-700 border-red-200" },
 ];
 
 const faqs = [
   {
-    q: "What renewal dates can RenewMate track?",
-    a: "RenewMate tracks all four critical renewal dates: vehicle tax, bluebook renewal, insurance expiry, and pollution test certificate.",
+    q: "What can RenewMate track?",
+    a: "RenewMate tracks subscriptions, monthly bills, rent, utilities, credit card payments, BNPL installments, loan EMIs, and any other recurring payment you have.",
   },
   {
     q: "How do reminders work?",
-    a: "We send reminders at 30, 15, 7, 3, and 1 day before each renewal deadline via email (Free), push notification, or Telegram (Premium).",
+    a: "We send email reminders at 30, 15, 7, 3, and 1 day before each payment date. Push and Telegram notifications are coming soon.",
+  },
+  {
+    q: "Is RenewMate free?",
+    a: "Yes — completely free. No plans, no limits, no credit card required. We built it to be genuinely helpful, not to upsell you.",
+  },
+  {
+    q: "Which currencies are supported?",
+    a: "34 currencies including USD, EUR, GBP, INR, NPR, SGD, JPY, KRW, AUD, CAD, and more. You can switch currency anytime from the dashboard.",
   },
   {
     q: "Is my data secure?",
-    a: "Yes. All data is encrypted and stored securely on Supabase (PostgreSQL). Documents are in private cloud storage accessible only by you.",
-  },
-  {
-    q: "Can I manage multiple vehicles?",
-    a: "Free plan supports up to 2 vehicles. Premium and Fleet plans support unlimited vehicles.",
-  },
-  {
-    q: "Which payment methods are accepted?",
-    a: "We accept eSewa, Khalti, and international cards via Stripe.",
+    a: "Yes. All data is encrypted and stored securely on Supabase (PostgreSQL). Row-level security ensures only you can access your data.",
   },
 ];
 
 const stats = [
-  { label: "Vehicle owners served", value: "2,000+" },
-  { label: "Renewals tracked", value: "12,000+" },
-  { label: "Late fees prevented", value: "Rs. 4L+" },
-  { label: "Uptime", value: "99.9%" },
+  { label: "Subscriptions tracked", value: "10,000+" },
+  { label: "Users worldwide", value: "2,000+" },
+  { label: "Categories supported", value: "5" },
+  { label: "Currencies supported", value: "34" },
 ];
 
 const testimonials = [
   {
-    name: "Ramesh Shrestha",
-    role: "Car owner, Kathmandu",
-    text: "I used to forget my bluebook renewal every year and pay the fine. RenewMate reminded me 2 weeks before — saved me Rs. 2,000 on the first try.",
-    avatar: "RS",
+    name: "Aryan Mehta",
+    role: "Student, Mumbai",
+    text: "I had no idea I was spending $180/month on subscriptions until I added them all to RenewMate. Cancelled 4 I'd completely forgotten about.",
+    avatar: "AM",
     avatarColor: "bg-blue-500",
     stars: 5,
   },
   {
-    name: "Sita Tamang",
-    role: "Taxi operator, Pokhara",
-    text: "I manage 8 taxis. Keeping track of insurance for all of them was a nightmare. The fleet dashboard makes it easy — I see everything at once.",
-    avatar: "ST",
+    name: "Sophie Laurent",
+    role: "Freelancer, Paris",
+    text: "I track my rent, Netflix, Adobe CC, and gym all in one place. The reminder 7 days before my credit card bill is a lifesaver.",
+    avatar: "SL",
     avatarColor: "bg-purple-500",
     stars: 5,
   },
   {
-    name: "Bikash Gurung",
-    role: "Bike owner, Lalitpur",
-    text: "Simple, fast, and useful. Got a Telegram reminder for my pollution test and renewed it the same day. Never been this organised.",
-    avatar: "BG",
+    name: "Kai Tanaka",
+    role: "Developer, Tokyo",
+    text: "Simple, clean, and actually useful. I added all my SaaS tools and now I know exactly what hits my card each month. No more surprises.",
+    avatar: "KT",
     avatarColor: "bg-green-500",
     stars: 5,
   },
@@ -187,32 +139,31 @@ export default function Home() {
 
       {/* ── Hero ── */}
       <section className="relative pt-24 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50 -z-10" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-600/5 rounded-full blur-3xl -z-10" />
 
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1.5 rounded-full mb-6 border border-blue-200">
             <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-            Built for Nepal 🇳🇵 — Trusted by 2,000+ vehicle owners
+            Free for everyone — no credit card needed
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-gray-900 leading-[1.1] mb-5 tracking-tight">
             Never Miss a<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-              Vehicle Renewal
+              Subscription Payment
             </span>{" "}
             Again.
           </h1>
 
           <p className="text-base sm:text-xl text-gray-500 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed">
-            Track vehicle tax, bluebook, insurance, and pollution test renewals for all your vehicles. Get timely reminders and avoid costly late fees — all from one dashboard.
+            Track every subscription, bill, rent, and financial liability in one place. Get reminded before payments hit — so you&apos;re always in control of your money.
           </p>
 
           <HeroCTAButtons />
 
-          <div className="flex flex-wrap justify-center gap-4 sm:gap-8 text-sm text-gray-500">
-            {["No credit card required", "Free plan forever", "Set up in 2 minutes"].map((t) => (
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-8 text-sm text-gray-500 mt-6">
+            {["100% free", "No credit card required", "34 currencies supported"].map((t) => (
               <span key={t} className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-green-500" />
                 {t}
@@ -223,7 +174,6 @@ export default function Home() {
 
         {/* Dashboard preview */}
         <div className="mt-14 sm:mt-20 max-w-5xl mx-auto relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/50 rounded-3xl -z-10 blur-xl opacity-80" />
           <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 shadow-2xl shadow-gray-300/50 overflow-hidden">
             {/* Window chrome */}
             <div className="flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-b border-gray-100">
@@ -233,52 +183,37 @@ export default function Home() {
                 <div className="w-3 h-3 rounded-full bg-green-400" />
               </div>
               <div className="ml-3 flex-1 bg-white rounded-md border border-gray-200 px-3 py-1 text-xs text-gray-400 font-mono max-w-xs">
-                renewmate.vercel.app/dashboard
+                renewmate.app/dashboard
               </div>
             </div>
 
             <div className="p-4 sm:p-6">
-              {/* Stats row */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-                {[
-                  { label: "Total Vehicles", value: "4", icon: Car, color: "text-blue-600", bg: "bg-blue-50" },
-                  { label: "Expiring Soon", value: "2", icon: Clock, color: "text-yellow-600", bg: "bg-yellow-50" },
-                  { label: "Expired", value: "1", icon: AlertTriangle, color: "text-red-500", bg: "bg-red-50" },
-                  { label: "All Good", value: "1", icon: CheckCircle2, color: "text-green-600", bg: "bg-green-50" },
-                ].map((stat) => (
-                  <div key={stat.label} className="bg-white rounded-xl p-3 sm:p-4 border border-gray-100 shadow-sm">
-                    <div className={`w-8 h-8 rounded-xl ${stat.bg} flex items-center justify-center mb-2`}>
-                      <stat.icon className={`w-4 h-4 ${stat.color}`} />
-                    </div>
-                    <div className="text-xl sm:text-2xl font-bold text-gray-900">{stat.value}</div>
-                    <div className="text-xs text-gray-500 mt-0.5">{stat.label}</div>
-                  </div>
-                ))}
+              {/* Dark spend card */}
+              <div className="bg-gray-900 rounded-2xl p-5 mb-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">Monthly spend</p>
+                  <p className="text-3xl font-bold text-white">$284.50</p>
+                  <p className="text-xs text-gray-400 mt-1">$3,414/yr across 12 subscriptions</p>
+                </div>
+                <div className="text-right">
+                  <span className="inline-block bg-red-500/20 text-red-400 text-xs font-semibold px-2.5 py-1 rounded-full">2 overdue</span>
+                </div>
               </div>
 
-              {/* Vehicle list */}
-              <div className="space-y-2.5">
-                <p className="text-xs font-semibold text-gray-500 mb-3">Renewal Status</p>
+              {/* Subscription list */}
+              <div className="space-y-2">
                 {[
-                  { plate: "BA 1 JA 1234", type: "Car", item: "Bluebook Renewal", label: "Tomorrow!", color: "border-red-200 bg-red-50 text-red-700" },
-                  { plate: "BA 2 CHA 5678", type: "Bike", item: "Vehicle Tax", label: "14 days", color: "border-yellow-200 bg-yellow-50 text-yellow-700" },
-                  { plate: "GA 3 NA 9876", type: "Jeep", item: "Pollution Test", label: "Expired 3d ago", color: "border-red-200 bg-red-50 text-red-700" },
-                  { plate: "BA 4 DA 4321", type: "Scooter", item: "Insurance Expiry", label: "45 days", color: "border-green-200 bg-green-50 text-green-700" },
-                ].map((v) => (
-                  <div
-                    key={v.plate}
-                    className={`flex items-center justify-between p-2.5 sm:p-3 rounded-xl border text-xs sm:text-sm ${v.color.split(" ").slice(0, 2).join(" ")} border-opacity-60`}
-                  >
-                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                      <span className="font-mono font-semibold text-gray-800 bg-white px-1.5 py-0.5 rounded border text-[10px] sm:text-xs shrink-0">
-                        {v.plate}
-                      </span>
-                      <span className="text-gray-400 text-[10px] hidden sm:inline">{v.type}</span>
-                      <span className="font-medium text-gray-700 truncate">{v.item}</span>
+                  { name: "Netflix", cat: "Entertainment", price: "$15.99/mo", days: "Tomorrow!", color: "border-l-purple-400 bg-red-50" },
+                  { name: "Rent", cat: "Living Essentials", price: "$950/mo", days: "5 days", color: "border-l-green-400 bg-yellow-50" },
+                  { name: "ChatGPT Plus", cat: "Tech & Tools", price: "$20/mo", days: "18 days", color: "border-l-blue-400 bg-white" },
+                  { name: "Gym Membership", cat: "Lifestyle", price: "$35/mo", days: "22 days", color: "border-l-orange-400 bg-white" },
+                ].map((s) => (
+                  <div key={s.name} className={`flex items-center justify-between p-3 rounded-xl border border-gray-100 border-l-4 ${s.color}`}>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-900">{s.name}</p>
+                      <p className="text-xs text-gray-400">{s.cat} · {s.price}</p>
                     </div>
-                    <span className={`font-bold text-[10px] sm:text-xs shrink-0 ml-2 ${v.color.split(" ")[2]}`}>
-                      {v.label}
-                    </span>
+                    <span className="text-xs font-bold text-gray-500 flex-shrink-0 ml-3">{s.days}</span>
                   </div>
                 ))}
               </div>
@@ -309,10 +244,10 @@ export default function Home() {
               Everything you need
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Stop losing money to late fees
+              Stop losing money to forgotten payments
             </h2>
             <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto">
-              Complete visibility over every vehicle renewal deadline — so you always know what&apos;s coming before it&apos;s too late.
+              The average person wastes $300/year on unused subscriptions. RenewMate keeps you aware so every dollar you spend is intentional.
             </p>
           </div>
 
@@ -333,8 +268,40 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Categories ── */}
+      <section className="py-16 sm:py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-10 sm:mb-12">
+            <span className="inline-block text-xs font-semibold tracking-widest uppercase text-blue-600 mb-3">
+              5 categories
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              Track every type of recurring payment
+            </h2>
+            <p className="text-gray-500 max-w-xl mx-auto">
+              From streaming services to rent to BNPL installments — if it repeats, RenewMate tracks it.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            {categories.map((cat) => (
+              <div key={cat.label} className={`border rounded-2xl p-5 ${cat.color}`}>
+                <p className="font-bold text-base mb-1">{cat.label}</p>
+                <p className="text-sm opacity-75">{cat.examples}</p>
+              </div>
+            ))}
+            <div className="border border-dashed border-gray-300 rounded-2xl p-5 text-gray-400 flex items-center gap-3">
+              <Repeat2 className="w-5 h-5 flex-shrink-0" />
+              <div>
+                <p className="font-semibold text-sm text-gray-600">+ Custom</p>
+                <p className="text-xs">Add anything with a custom name</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── How it works ── */}
-      <section className="py-16 sm:py-24 bg-gray-50 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
             <span className="inline-block text-xs font-semibold tracking-widest uppercase text-blue-600 mb-3">
@@ -345,29 +312,26 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-8 sm:gap-12 relative">
-            {/* Connection line */}
-            <div className="hidden sm:block absolute top-16 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-blue-300 to-blue-300 bg-dashed" />
-
+          <div className="grid sm:grid-cols-3 gap-8 sm:gap-12">
             {[
               {
                 step: "01",
-                title: "Add your vehicles",
-                desc: "Enter vehicle number, type, province, and renewal dates. Takes under a minute per vehicle.",
-                icon: Car,
+                title: "Add your subscriptions",
+                desc: "Pick a category, choose from presets or type a custom name, set the price and next billing date. Done in seconds.",
+                icon: CreditCard,
                 color: "from-blue-600 to-blue-700",
               },
               {
                 step: "02",
-                title: "We track the deadlines",
-                desc: "RenewMate monitors your tax, bluebook, insurance, and pollution test expiry dates automatically.",
-                icon: Clock,
+                title: "We track every deadline",
+                desc: "RenewMate monitors all your payment dates and calculates your monthly and yearly totals automatically.",
+                icon: LayoutDashboard,
                 color: "from-indigo-600 to-purple-700",
               },
               {
                 step: "03",
                 title: "Get timely reminders",
-                desc: "Receive alerts 30, 15, 7, 3, and 1 day before each renewal via email, push, or Telegram.",
+                desc: "Receive alerts 30, 15, 7, 3, and 1 day before each payment via email. Push and Telegram coming soon.",
                 icon: Bell,
                 color: "from-green-600 to-emerald-700",
               },
@@ -385,45 +349,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Vehicle types ── */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-              Works for every vehicle type
-            </h2>
-            <p className="text-gray-500">Whether you own one bike or a fleet of trucks, RenewMate has you covered.</p>
-          </div>
-          <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-7 gap-3 sm:gap-4">
-            {[
-              { label: "Bikes", icon: Bike },
-              { label: "Scooters", icon: Bike },
-              { label: "Cars", icon: Car },
-              { label: "Jeeps", icon: Car },
-              { label: "Vans", icon: Truck },
-              { label: "Trucks", icon: Truck },
-              { label: "Fleets", icon: Users },
-            ].map((v) => (
-              <div
-                key={v.label}
-                className="flex flex-col items-center gap-2 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-all cursor-default group"
-              >
-                <v.icon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 group-hover:text-blue-600 transition-colors" />
-                <span className="text-[10px] sm:text-xs font-medium text-gray-500 group-hover:text-blue-700 transition-colors">{v.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── Testimonials ── */}
       <section className="py-16 sm:py-24 bg-gray-50 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-              Trusted by Nepal vehicle owners
+              People who actually use it
             </h2>
-            <p className="text-gray-500">Join thousands who never miss a renewal deadline.</p>
+            <p className="text-gray-500">Join thousands who never miss a payment.</p>
           </div>
           <div className="grid sm:grid-cols-3 gap-5 sm:gap-6">
             {testimonials.map((review) => (
@@ -449,83 +382,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Pricing ── */}
-      <section id="pricing" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 sm:mb-16">
-            <span className="inline-block text-xs font-semibold tracking-widest uppercase text-blue-600 mb-3">
-              Simple pricing
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Start free. Upgrade anytime.
-            </h2>
-            <p className="text-base sm:text-lg text-gray-500">No hidden fees. No surprises. Cancel anytime.</p>
-          </div>
-
-          <div className="grid sm:grid-cols-3 gap-5 sm:gap-6 max-w-5xl mx-auto">
-            {plans.map((plan) => (
-              <div
-                key={plan.name}
-                className={`relative rounded-2xl overflow-hidden border ${
-                  plan.highlight
-                    ? "border-blue-500 shadow-2xl shadow-blue-100 scale-[1.03]"
-                    : "border-gray-200"
-                } bg-white`}
-              >
-                {plan.highlight && (
-                  <>
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
-                    <div className="absolute top-4 right-4">
-                      <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                        MOST POPULAR
-                      </span>
-                    </div>
-                  </>
-                )}
-                <div className="p-6">
-                  <div className="font-bold text-gray-900 text-xl mb-1">{plan.name}</div>
-                  <div className="flex items-baseline gap-1 mb-1">
-                    <span className="text-3xl font-extrabold text-gray-900">{plan.price}</span>
-                    <span className="text-gray-500 text-sm">{plan.period}</span>
-                  </div>
-                  {"annualNote" in plan && (
-                    <div className="text-xs text-green-600 font-semibold mb-3">{plan.annualNote}</div>
-                  )}
-                  <p className="text-sm text-gray-500 mb-6">{plan.description}</p>
-
-                  <Link
-                    href={plan.href}
-                    className={`block w-full text-center py-2.5 rounded-xl font-semibold text-sm mb-6 transition-all ${
-                      plan.highlight
-                        ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-200"
-                        : "border border-gray-200 hover:bg-gray-50 text-gray-900"
-                    }`}
-                  >
-                    {plan.cta}
-                  </Link>
-
-                  <ul className="space-y-3">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
-                        <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── Blog preview ── */}
-      <section className="py-16 sm:py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8 sm:mb-10">
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">From the blog</h2>
-              <p className="text-gray-500 text-sm mt-1">Vehicle renewal guides and tips for Nepal owners</p>
+              <p className="text-gray-500 text-sm mt-1">Guides on managing subscriptions and saving money</p>
             </div>
             <Link
               href="/blog"
@@ -563,7 +426,7 @@ export default function Home() {
       </section>
 
       {/* ── FAQ ── */}
-      <section id="faq" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
+      <section id="faq" className="py-16 sm:py-24 bg-gray-50 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10 sm:mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Frequently asked questions</h2>
@@ -591,17 +454,18 @@ export default function Home() {
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-2xl" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-400/10 rounded-full blur-xl" />
           <div className="relative">
+            <Shield className="w-12 h-12 text-blue-300 mx-auto mb-5" />
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-              Ready to stop paying late fees?
+              Take control of your subscriptions today
             </h2>
             <p className="text-blue-200 text-base sm:text-lg mb-8 max-w-xl mx-auto">
-              Join 2,000+ Nepal vehicle owners who never miss a renewal deadline. Free to start, no credit card needed.
+              Free forever. No limits. Add everything — from Netflix to your rent to your credit card bill.
             </p>
             <Link
               href="/register"
               className="inline-flex items-center gap-2 bg-white text-blue-700 hover:bg-blue-50 text-base font-bold px-8 py-3.5 rounded-xl shadow-lg transition-all hover:-translate-y-0.5"
             >
-              Get started for free
+              Get started free
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

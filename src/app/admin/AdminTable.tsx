@@ -6,7 +6,6 @@ import {
   Search,
   Users,
   Activity,
-  Car,
   UserCheck,
   Mail,
   Globe,
@@ -15,6 +14,7 @@ import {
   Clock,
   ArrowLeft,
   Shield,
+  CreditCard,
 } from "lucide-react";
 
 export type AdminUser = {
@@ -23,7 +23,7 @@ export type AdminUser = {
   created_at: string;
   last_sign_in_at: string | null;
   provider: string;
-  vehicles: number;
+  subscriptions: number;
 };
 
 function formatDate(iso: string | null): string {
@@ -107,7 +107,7 @@ export default function AdminTable({
 
   const active7d = users.filter((u) => isActiveInDays(u.last_sign_in_at, 7)).length;
   const newThisMonth = users.filter((u) => isActiveInDays(u.created_at, 30)).length;
-  const totalVehicles = users.reduce((s, u) => s + u.vehicles, 0);
+  const totalSubs = users.reduce((s, u) => s + u.subscriptions, 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -150,7 +150,7 @@ export default function AdminTable({
             { label: "Total Users", value: users.length, icon: Users, color: "bg-blue-50 text-blue-600", border: "border-blue-100" },
             { label: "Active (7 days)", value: active7d, icon: Activity, color: "bg-green-50 text-green-600", border: "border-green-100" },
             { label: "New (30 days)", value: newThisMonth, icon: UserCheck, color: "bg-purple-50 text-purple-600", border: "border-purple-100" },
-            { label: "Total Vehicles", value: totalVehicles, icon: Car, color: "bg-orange-50 text-orange-600", border: "border-orange-100" },
+            { label: "Total Subscriptions", value: totalSubs, icon: CreditCard, color: "bg-orange-50 text-orange-600", border: "border-orange-100" },
           ].map(({ label, value, icon: Icon, color, border }) => (
             <div key={label} className={`bg-white rounded-2xl border ${border} shadow-sm p-5`}>
               <div className={`w-9 h-9 rounded-xl ${color} flex items-center justify-center mb-3`}>
@@ -164,15 +164,12 @@ export default function AdminTable({
 
         {/* Users table */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          {/* Table header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-gray-100">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
                 <Users className="w-3.5 h-3.5 text-blue-600" />
               </div>
-              <span className="font-semibold text-gray-900 text-sm">
-                All Users
-              </span>
+              <span className="font-semibold text-gray-900 text-sm">All Users</span>
               <span className="text-[11px] bg-gray-100 text-gray-500 font-semibold px-2 py-0.5 rounded-full">
                 {filtered.length}
               </span>
@@ -198,7 +195,7 @@ export default function AdminTable({
                   <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">Provider</th>
                   <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">Joined</th>
                   <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">Last seen</th>
-                  <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">Vehicles</th>
+                  <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">Subscriptions</th>
                   <th className="text-left text-xs font-semibold text-gray-500 px-4 py-3">Status</th>
                 </tr>
               </thead>
@@ -229,8 +226,8 @@ export default function AdminTable({
                       </td>
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-1.5">
-                          <Car className="w-3.5 h-3.5 text-gray-400" />
-                          <span className="font-semibold text-gray-800">{user.vehicles}</span>
+                          <CreditCard className="w-3.5 h-3.5 text-gray-400" />
+                          <span className="font-semibold text-gray-800">{user.subscriptions}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3.5">
@@ -267,7 +264,7 @@ export default function AdminTable({
                         <Clock className="w-3 h-3" /> {timeAgo(user.last_sign_in_at)}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Car className="w-3 h-3" /> {user.vehicles} vehicle{user.vehicles !== 1 ? "s" : ""}
+                        <CreditCard className="w-3 h-3" /> {user.subscriptions} sub{user.subscriptions !== 1 ? "s" : ""}
                       </span>
                     </div>
                   </div>

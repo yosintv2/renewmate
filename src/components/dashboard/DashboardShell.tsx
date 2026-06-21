@@ -27,7 +27,7 @@ function CurrencySelector() {
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-sm max-h-[80vh] flex flex-col">
+        <DialogContent className="sm:max-w-sm max-h-[80vh] flex flex-col" showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Choose Currency</DialogTitle>
           </DialogHeader>
@@ -89,7 +89,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             <div className="w-6 h-6 rounded-md bg-blue-600 flex items-center justify-center">
               <Shield className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="text-gray-900">Sub<span className="text-blue-600">Track</span></span>
+            <span className="text-gray-900">Renew<span className="text-blue-600">Mate</span></span>
           </Link>
 
           <div className="ml-auto flex items-center gap-2">

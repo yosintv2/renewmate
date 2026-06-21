@@ -4,14 +4,12 @@ import { Shield, Mail, MessageCircle } from "lucide-react";
 const footerLinks = {
   Product: [
     { href: "/#features", label: "Features" },
-    { href: "/#pricing", label: "Pricing" },
     { href: "/blog", label: "Blog" },
     { href: "/#faq", label: "FAQ" },
   ],
   Company: [
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
-    { href: "/changelog", label: "Changelog" },
   ],
   Legal: [
     { href: "/privacy", label: "Privacy Policy" },
@@ -35,11 +33,11 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm text-gray-500 leading-relaxed max-w-xs mb-5">
-              Nepal&apos;s trusted vehicle renewal reminder platform. Never pay a late fee again. Track tax, bluebook, insurance, and pollution test for all your vehicles.
+              Track every subscription, bill, and recurring payment in one place. Get reminded before they charge — stay in control of your money.
             </p>
             <div className="flex items-center gap-3">
               <a
-                href="mailto:hello@renewmate.com"
+                href="mailto:hello@renewmate.app"
                 className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
                 aria-label="Email us"
               >
@@ -82,9 +80,9 @@ export default function Footer() {
               © {new Date().getFullYear()} RenewMate. All rights reserved.
             </p>
             <span className="text-gray-700 text-xs hidden sm:inline">·</span>
-            <p className="text-xs text-gray-600 hidden sm:inline">Built with care in Nepal 🇳🇵</p>
+            <p className="text-xs text-gray-600 hidden sm:inline">Free for everyone, forever.</p>
           </div>
-          <p className="text-xs text-gray-600 italic">Never Miss a Renewal.</p>
+          <p className="text-xs text-gray-600 italic">Never Miss a Payment.</p>
         </div>
       </div>
     </footer>

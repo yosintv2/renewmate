@@ -57,12 +57,12 @@ export default async function AdminPage() {
     return <MissingKeyPage />;
   }
 
-  // Fetch all users + vehicle counts via admin client
+  // Fetch all users + subscription counts via admin client
   const admin = createAdminClient();
 
-  const [{ data: authData, error }, { data: vehicles }] = await Promise.all([
+  const [{ data: authData, error }, { data: subscriptions }] = await Promise.all([
     admin.auth.admin.listUsers({ perPage: 1000 }),
-    admin.from("vehicles").select("user_id"),
+    admin.from("subscriptions").select("user_id"),
   ]);
 
   if (error) {
@@ -77,9 +77,9 @@ export default async function AdminPage() {
     );
   }
 
-  const vehicleCounts: Record<string, number> = {};
-  vehicles?.forEach((v) => {
-    vehicleCounts[v.user_id] = (vehicleCounts[v.user_id] ?? 0) + 1;
+  const subCounts: Record<string, number> = {};
+  subscriptions?.forEach((s) => {
+    subCounts[s.user_id] = (subCounts[s.user_id] ?? 0) + 1;
   });
 
   const adminUsers: AdminUser[] = (authData?.users ?? []).map((u) => ({
@@ -88,7 +88,7 @@ export default async function AdminPage() {
     created_at: u.created_at,
     last_sign_in_at: u.last_sign_in_at ?? null,
     provider: (u.app_metadata?.provider as string | undefined) ?? "email",
-    vehicles: vehicleCounts[u.id] ?? 0,
+    subscriptions: subCounts[u.id] ?? 0,
   }));
 
   return <AdminTable users={adminUsers} currentUserEmail={user.email!} />;
