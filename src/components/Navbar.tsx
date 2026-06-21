@@ -30,81 +30,91 @@ export default function Navbar() {
   };
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-200",
-        scrolled
-          ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100"
-          : "bg-transparent"
-      )}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl flex-shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
-              <Shield className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-gray-900">
-              Renew<span className="text-blue-600">Tracker</span>
-            </span>
-          </Link>
+    <header className="fixed top-0 left-0 right-0 z-50">
+      {/* Header bar — only transition the 3 properties that actually change on scroll */}
+      <div
+        className={cn(
+          "transition-[background-color,box-shadow,border-color] duration-200",
+          scrolled
+            ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100"
+            : "bg-transparent"
+        )}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2 font-bold text-xl flex-shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
+                <Shield className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-gray-900">
+                Renew<span className="text-blue-600">Tracker</span>
+              </span>
+            </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors"
+            {/* Desktop nav */}
+            <nav className="hidden md:flex items-center gap-1">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Desktop CTA */}
+            <div className="hidden md:flex items-center gap-2">
+              <button
+                onClick={() => navigate("/login")}
+                disabled={loadingHref !== null}
+                className="inline-flex items-center justify-center gap-2 min-w-[75px] text-sm font-medium text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors disabled:pointer-events-none"
               >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+                {loadingHref === "/login" ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Sign in"
+                )}
+              </button>
+              <button
+                onClick={() => navigate("/register")}
+                disabled={loadingHref !== null}
+                className="inline-flex items-center justify-center gap-2 min-w-[140px] text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition-colors shadow-sm disabled:opacity-90 disabled:pointer-events-none"
+              >
+                {loadingHref === "/register" ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Get started free"
+                )}
+              </button>
+            </div>
 
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-2">
+            {/* Mobile hamburger */}
             <button
-              onClick={() => navigate("/login")}
-              disabled={loadingHref !== null}
-              className="inline-flex items-center justify-center gap-2 min-w-[75px] text-sm font-medium text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors disabled:pointer-events-none"
+              className="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              onClick={() => setOpen(!open)}
+              aria-label="Toggle menu"
             >
-              {loadingHref === "/login" ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                "Sign in"
-              )}
-            </button>
-            <button
-              onClick={() => navigate("/register")}
-              disabled={loadingHref !== null}
-              className="inline-flex items-center justify-center gap-2 min-w-[140px] text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition-colors shadow-sm disabled:opacity-90 disabled:pointer-events-none"
-            >
-              {loadingHref === "/register" ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                "Get started free"
-              )}
+              {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
-
-          {/* Mobile hamburger */}
-          <button
-            className="md:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-            onClick={() => setOpen(!open)}
-            aria-label="Toggle menu"
-          >
-            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/*
+        Mobile menu — position:absolute so it overlays content (no layout impact on header).
+        Animate transform+opacity: both GPU-composited, zero layout work per frame.
+        Always mounted; pointer-events-none when closed avoids click-through.
+      */}
       <div
         className={cn(
-          "md:hidden bg-white border-b border-gray-100 overflow-hidden transition-all duration-150",
-          open ? "max-h-[360px] opacity-100" : "max-h-0 opacity-0"
+          "md:hidden absolute left-0 right-0 bg-white border-b border-gray-100 shadow-lg",
+          "transition-[transform,opacity] duration-150 ease-out will-change-transform",
+          open
+            ? "translate-y-0 opacity-100 pointer-events-auto"
+            : "-translate-y-3 opacity-0 pointer-events-none"
         )}
       >
         <div className="px-4 py-4 space-y-1">
