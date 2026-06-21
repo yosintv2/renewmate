@@ -14,6 +14,7 @@ import {
   LogOut,
   X,
   ChevronRight,
+  Tv,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -47,6 +48,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const [userPlan, setUserPlan] = useState("free");
   const [vehicleCount, setVehicleCount] = useState(0);
   const [alertCount, setAlertCount] = useState(0);
+  const [subCount, setSubCount] = useState(0);
   const [initials, setInitials] = useState("?");
   const [avatarColor, setAvatarColor] = useState("bg-blue-500");
 
@@ -55,13 +57,15 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   useEffect(() => {
     async function load() {
       const supabase = createClient();
-      const [{ data: authData }, { data: vehicles }, { data: profile }] = await Promise.all([
-        supabase.auth.getUser(),
-        supabase
-          .from("vehicles")
-          .select("tax_expiry, bluebook_expiry, insurance_expiry, pollution_expiry"),
-        supabase.from("profiles").select("name, plan").single(),
-      ]);
+      const [{ data: authData }, { data: vehicles }, { data: profile }, { data: subs }] =
+        await Promise.all([
+          supabase.auth.getUser(),
+          supabase
+            .from("vehicles")
+            .select("tax_expiry, bluebook_expiry, insurance_expiry, pollution_expiry"),
+          supabase.from("profiles").select("name, plan").single(),
+          supabase.from("subscriptions").select("next_billing_date"),
+        ]);
 
       const displayName =
         profile?.name ||
@@ -84,7 +88,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
       if (vehicles) {
         setVehicleCount(vehicles.length);
-        const alerts = vehicles.reduce((count, v) => {
+        const vehicleAlerts = vehicles.reduce((count, v) => {
           const days = [
             daysUntil(v.tax_expiry),
             daysUntil(v.bluebook_expiry),
@@ -93,8 +97,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           ].filter((d): d is number => d !== null);
           return count + days.filter((d) => d <= 30).length;
         }, 0);
-        setAlertCount(alerts);
+        const subAlerts = (subs ?? []).filter((s) => {
+          const d = daysUntil(s.next_billing_date);
+          return d !== null && d <= 7;
+        }).length;
+        setAlertCount(vehicleAlerts + subAlerts);
       }
+      if (subs) setSubCount(subs.length);
     }
     load();
   }, [pathname]);
@@ -113,6 +122,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       label: "Vehicles",
       icon: Car,
       badge: vehicleCount > 0 ? String(vehicleCount) : undefined,
+      badgeVariant: "count",
+    },
+    {
+      href: "/dashboard/subscriptions",
+      label: "Subscriptions",
+      icon: Tv,
+      badge: subCount > 0 ? String(subCount) : undefined,
       badgeVariant: "count",
     },
     {

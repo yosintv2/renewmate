@@ -63,6 +63,19 @@ create table public.notifications (
   status text default 'pending' check (status in ('pending', 'sent', 'failed'))
 );
 
+-- Subscriptions / Bills table
+create table public.subscriptions (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  name text not null,
+  category text not null check (category in ('streaming', 'music', 'gaming', 'bills', 'cloud', 'other')),
+  price numeric(10,2) not null,
+  billing_cycle text not null check (billing_cycle in ('monthly', 'yearly')),
+  next_billing_date date not null,
+  notes text,
+  created_at timestamptz default now()
+);
+
 -- Row Level Security (RLS) — users can only see their own data
 alter table public.profiles enable row level security;
 alter table public.vehicles enable row level security;
@@ -83,6 +96,18 @@ create policy "Users can insert own vehicles" on public.vehicles
 create policy "Users can update own vehicles" on public.vehicles
   for update using (auth.uid() = user_id);
 create policy "Users can delete own vehicles" on public.vehicles
+  for delete using (auth.uid() = user_id);
+
+-- Subscriptions RLS
+alter table public.subscriptions enable row level security;
+
+create policy "Users can view own subscriptions" on public.subscriptions
+  for select using (auth.uid() = user_id);
+create policy "Users can insert own subscriptions" on public.subscriptions
+  for insert with check (auth.uid() = user_id);
+create policy "Users can update own subscriptions" on public.subscriptions
+  for update using (auth.uid() = user_id);
+create policy "Users can delete own subscriptions" on public.subscriptions
   for delete using (auth.uid() = user_id);
 
 -- Documents: users can only CRUD documents for their own vehicles

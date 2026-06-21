@@ -18,6 +18,8 @@ import {
   Plus,
   Zap,
   Calendar,
+  Tv,
+  Receipt,
 } from "lucide-react";
 
 type Vehicle = {
@@ -32,12 +34,22 @@ type Vehicle = {
   pollution_expiry: string | null;
 };
 
+type Subscription = {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  billing_cycle: string;
+  next_billing_date: string;
+};
+
 type RenewalItem = {
   key: string;
-  plate: string;
-  vehicle: string;
+  label: string;
+  sublabel: string;
   type: string;
   days: number;
+  kind: "vehicle" | "subscription";
 };
 
 function daysUntil(dateStr: string | null): number | null {
@@ -49,7 +61,7 @@ function daysUntil(dateStr: string | null): number | null {
   return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-function buildRenewals(vehicles: Vehicle[]): RenewalItem[] {
+function buildVehicleRenewals(vehicles: Vehicle[]): RenewalItem[] {
   const items: RenewalItem[] = [];
   for (const v of vehicles) {
     const vehicleName = [v.brand, v.model].filter(Boolean).join(" ") || v.vehicle_type;
@@ -62,18 +74,43 @@ function buildRenewals(vehicles: Vehicle[]): RenewalItem[] {
     for (const [type, expiry] of pairs) {
       const days = daysUntil(expiry);
       if (days !== null) {
-        items.push({ key: `${v.id}-${type}`, plate: v.vehicle_number, vehicle: vehicleName, type, days });
+        items.push({
+          key: `${v.id}-${type}`,
+          label: v.vehicle_number,
+          sublabel: `${vehicleName} · ${type}`,
+          type,
+          days,
+          kind: "vehicle",
+        });
       }
     }
   }
   return items;
 }
 
+function buildSubRenewals(subs: Subscription[]): RenewalItem[] {
+  return subs.map((s) => {
+    const days = daysUntil(s.next_billing_date) ?? 0;
+    return {
+      key: `sub-${s.id}`,
+      label: s.name,
+      sublabel: `Rs. ${s.price.toLocaleString()}/${s.billing_cycle === "monthly" ? "mo" : "yr"}`,
+      type: s.category,
+      days,
+      kind: "subscription",
+    };
+  });
+}
+
+function monthlyEquiv(price: number, cycle: string): number {
+  return cycle === "yearly" ? price / 12 : price;
+}
+
 function StatusBadge({ days }: { days: number }) {
   if (days < 0)
     return <Badge className="bg-red-100 text-red-700 hover:bg-red-100 text-xs border-0">Expired {Math.abs(days)}d ago</Badge>;
   if (days === 0)
-    return <Badge className="bg-red-100 text-red-700 hover:bg-red-100 text-xs border-0">Expires today</Badge>;
+    return <Badge className="bg-red-100 text-red-700 hover:bg-red-100 text-xs border-0">Due today</Badge>;
   if (days === 1)
     return <Badge className="bg-red-100 text-red-700 hover:bg-red-100 text-xs border-0">Tomorrow</Badge>;
   if (days <= 7)
@@ -87,6 +124,7 @@ function StatusBadge({ days }: { days: number }) {
 
 export default function DashboardPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [userName, setUserName] = useState("there");
   const [userPlan, setUserPlan] = useState("free");
   const [loading, setLoading] = useState(true);
@@ -94,10 +132,16 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       const supabase = createClient();
-      const [{ data: authData }, { data: vehicleData }, { data: profileData }] = await Promise.all([
+      const [
+        { data: authData },
+        { data: vehicleData },
+        { data: profileData },
+        { data: subData },
+      ] = await Promise.all([
         supabase.auth.getUser(),
         supabase.from("vehicles").select("*").order("created_at", { ascending: false }),
         supabase.from("profiles").select("name, plan").single(),
+        supabase.from("subscriptions").select("*").order("next_billing_date", { ascending: true }),
       ]);
 
       if (authData?.user) {
@@ -110,18 +154,28 @@ export default function DashboardPage() {
       }
       if (profileData?.plan) setUserPlan(profileData.plan);
       if (vehicleData) setVehicles(vehicleData);
+      if (subData) setSubscriptions(subData);
       setLoading(false);
     }
     load();
   }, []);
 
-  const allRenewals = buildRenewals(vehicles).sort((a, b) => a.days - b.days);
+  const allVehicleRenewals = buildVehicleRenewals(vehicles).sort((a, b) => a.days - b.days);
+  const allSubRenewals = buildSubRenewals(subscriptions).sort((a, b) => a.days - b.days);
+  const allRenewals = [...allVehicleRenewals, ...allSubRenewals].sort((a, b) => a.days - b.days);
+
   const urgentAlerts = allRenewals.filter((r) => r.days <= 30);
   const comingUp = allRenewals.filter((r) => r.days >= 0 && r.days <= 90).slice(0, 6);
 
-  const expired = allRenewals.filter((r) => r.days < 0).length;
-  const expiringSoon = allRenewals.filter((r) => r.days >= 0 && r.days <= 15).length;
-  const allGood = allRenewals.filter((r) => r.days > 15).length;
+  const expired = allVehicleRenewals.filter((r) => r.days < 0).length;
+  const expiringSoon = allVehicleRenewals.filter((r) => r.days >= 0 && r.days <= 15).length;
+  const allGood = allVehicleRenewals.filter((r) => r.days > 15).length;
+
+  const totalMonthly = subscriptions.reduce(
+    (sum, s) => sum + monthlyEquiv(s.price, s.billing_cycle),
+    0
+  );
+  const subsDueSoon = allSubRenewals.filter((r) => r.days >= 0 && r.days <= 30).length;
 
   const FREE_LIMIT = 2;
   const vehiclePercent = Math.min(100, (vehicles.length / FREE_LIMIT) * 100);
@@ -144,6 +198,8 @@ export default function DashboardPage() {
     );
   }
 
+  const hasData = vehicles.length > 0 || subscriptions.length > 0;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -161,8 +217,8 @@ export default function DashboardPage() {
                 </span>{" "}
                 needing attention
               </>
-            ) : vehicles.length === 0 ? (
-              "Add your first vehicle to start tracking"
+            ) : !hasData ? (
+              "Add your vehicles and subscriptions to start tracking"
             ) : (
               "All renewals look good — keep it up!"
             )}
@@ -200,26 +256,68 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      {/* Subscriptions/Bills cost bar */}
+      {subscriptions.length > 0 && (
+        <div className="bg-white rounded-2xl border border-indigo-100 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex items-center gap-3 flex-1">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0">
+              <Receipt className="w-5 h-5 text-indigo-600" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-900">
+                Rs. {Math.round(totalMonthly).toLocaleString()}
+                <span className="text-gray-400 font-normal">/month</span>
+              </p>
+              <p className="text-xs text-gray-500">
+                {subscriptions.length} subscription{subscriptions.length !== 1 ? "s" : ""} ·{" "}
+                Rs. {Math.round(totalMonthly * 12).toLocaleString()}/year total
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {subsDueSoon > 0 && (
+              <span className="text-xs bg-yellow-100 text-yellow-700 font-semibold px-2.5 py-1 rounded-full">
+                {subsDueSoon} due in 30 days
+              </span>
+            )}
+            <Link
+              href="/dashboard/subscriptions"
+              className="text-xs text-indigo-600 font-semibold hover:underline whitespace-nowrap"
+            >
+              Manage →
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Empty state */}
-      {vehicles.length === 0 && (
+      {!hasData && (
         <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-10 sm:p-16 flex flex-col items-center text-center">
           <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
             <Car className="w-7 h-7 text-gray-400" />
           </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-2">No vehicles yet</h3>
-          <p className="text-sm text-gray-500 mb-6 max-w-xs">
-            Add your vehicles to start tracking tax, bluebook, insurance, and pollution test renewals.
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Nothing tracked yet</h3>
+          <p className="text-sm text-gray-500 mb-6 max-w-sm">
+            Add your vehicles to track renewals, or add subscriptions and bills to never miss a payment.
           </p>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2 shadow-md shadow-blue-200" asChild>
-            <Link href="/dashboard/vehicles">
-              <Plus className="w-4 h-4" />
-              Add your first vehicle
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2 shadow-md shadow-blue-200" asChild>
+              <Link href="/dashboard/vehicles">
+                <Plus className="w-4 h-4" />
+                Add vehicle
+              </Link>
+            </Button>
+            <Button variant="outline" className="rounded-xl gap-2 border-gray-200" asChild>
+              <Link href="/dashboard/subscriptions">
+                <Tv className="w-4 h-4" />
+                Add subscription
+              </Link>
+            </Button>
+          </div>
         </div>
       )}
 
-      {vehicles.length > 0 && (
+      {hasData && (
         <div className="grid lg:grid-cols-3 gap-5 sm:gap-6">
           {/* Left: Urgent + Vehicle list */}
           <div className="lg:col-span-2 space-y-5">
@@ -246,7 +344,7 @@ export default function DashboardPage() {
                   <div className="text-center py-8">
                     <CheckCircle2 className="w-10 h-10 mx-auto mb-2 text-green-400" />
                     <p className="text-sm font-medium text-gray-700">All renewals are up to date!</p>
-                    <p className="text-xs text-gray-400 mt-1">You have nothing expiring in the next 30 days</p>
+                    <p className="text-xs text-gray-400 mt-1">Nothing expiring in the next 30 days</p>
                   </div>
                 ) : (
                   <div className="space-y-2.5">
@@ -264,14 +362,25 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-3 min-w-0">
                           <div
                             className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                              r.days < 0 || r.days <= 3 ? "bg-red-500" : r.days <= 7 ? "bg-orange-500" : "bg-yellow-500"
+                              r.days < 0 || r.days <= 3
+                                ? "bg-red-500"
+                                : r.days <= 7
+                                ? "bg-orange-500"
+                                : "bg-yellow-500"
                             }`}
                           />
                           <div className="min-w-0">
-                            <p className="font-mono text-sm font-bold text-gray-900 leading-none">{r.plate}</p>
-                            <p className="text-xs text-gray-500 mt-0.5 truncate">
-                              {r.vehicle} · {r.type}
-                            </p>
+                            <div className="flex items-center gap-1.5">
+                              {r.kind === "subscription" ? (
+                                <Tv className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                              ) : (
+                                <Car className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                              )}
+                              <p className="font-semibold text-sm text-gray-900 leading-none truncate">
+                                {r.label}
+                              </p>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-0.5 truncate">{r.sublabel}</p>
                           </div>
                         </div>
                         <StatusBadge days={r.days} />
@@ -283,55 +392,123 @@ export default function DashboardPage() {
             </div>
 
             {/* Vehicle list */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <Car className="w-3.5 h-3.5 text-blue-600" />
-                  </div>
-                  <span className="font-semibold text-gray-900 text-sm">All Vehicles</span>
-                </div>
-                <Link href="/dashboard/vehicles" className="text-xs text-blue-600 hover:underline font-medium">
-                  Manage
-                </Link>
-              </div>
-              <div className="divide-y divide-gray-50">
-                {vehicles.map((v) => {
-                  const days = [
-                    daysUntil(v.tax_expiry),
-                    daysUntil(v.bluebook_expiry),
-                    daysUntil(v.insurance_expiry),
-                    daysUntil(v.pollution_expiry),
-                  ].filter((d): d is number => d !== null);
-                  const worstDays = days.length ? Math.min(...days) : null;
-                  return (
-                    <div
-                      key={v.id}
-                      className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
-                          <Car className="w-4 h-4 text-gray-500" />
-                        </div>
-                        <div>
-                          <p className="font-mono text-sm font-bold text-gray-900 leading-none">
-                            {v.vehicle_number}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            {[v.brand, v.model].filter(Boolean).join(" ") || v.vehicle_type}
-                          </p>
-                        </div>
-                      </div>
-                      {worstDays !== null ? (
-                        <StatusBadge days={worstDays} />
-                      ) : (
-                        <Badge className="bg-gray-100 text-gray-400 hover:bg-gray-100 text-xs border-0">No dates</Badge>
-                      )}
+            {vehicles.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+                      <Car className="w-3.5 h-3.5 text-blue-600" />
                     </div>
-                  );
-                })}
+                    <span className="font-semibold text-gray-900 text-sm">All Vehicles</span>
+                  </div>
+                  <Link href="/dashboard/vehicles" className="text-xs text-blue-600 hover:underline font-medium">
+                    Manage
+                  </Link>
+                </div>
+                <div className="divide-y divide-gray-50">
+                  {vehicles.map((v) => {
+                    const days = [
+                      daysUntil(v.tax_expiry),
+                      daysUntil(v.bluebook_expiry),
+                      daysUntil(v.insurance_expiry),
+                      daysUntil(v.pollution_expiry),
+                    ].filter((d): d is number => d !== null);
+                    const worstDays = days.length ? Math.min(...days) : null;
+                    return (
+                      <div
+                        key={v.id}
+                        className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+                            <Car className="w-4 h-4 text-gray-500" />
+                          </div>
+                          <div>
+                            <p className="font-mono text-sm font-bold text-gray-900 leading-none">
+                              {v.vehicle_number}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              {[v.brand, v.model].filter(Boolean).join(" ") || v.vehicle_type}
+                            </p>
+                          </div>
+                        </div>
+                        {worstDays !== null ? (
+                          <StatusBadge days={worstDays} />
+                        ) : (
+                          <Badge className="bg-gray-100 text-gray-400 hover:bg-gray-100 text-xs border-0">
+                            No dates
+                          </Badge>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Subscriptions summary */}
+            {subscriptions.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
+                      <Tv className="w-3.5 h-3.5 text-indigo-600" />
+                    </div>
+                    <span className="font-semibold text-gray-900 text-sm">Subscriptions & Bills</span>
+                  </div>
+                  <Link href="/dashboard/subscriptions" className="text-xs text-blue-600 hover:underline font-medium">
+                    Manage
+                  </Link>
+                </div>
+                <div className="divide-y divide-gray-50">
+                  {subscriptions.slice(0, 5).map((s) => {
+                    const days = daysUntil(s.next_billing_date);
+                    return (
+                      <div
+                        key={s.id}
+                        className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0 text-base">
+                            {s.name === "Netflix" ? "🎬" :
+                             s.name === "Spotify" ? "🎵" :
+                             s.name === "Amazon Prime" ? "📦" :
+                             s.name === "Disney+" ? "✨" :
+                             s.name === "YouTube Premium" ? "▶️" :
+                             s.category === "bills" ? "🧾" : "📋"}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900 leading-none">
+                              {s.name}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              Rs. {s.price.toLocaleString()}/{s.billing_cycle === "monthly" ? "mo" : "yr"}
+                            </p>
+                          </div>
+                        </div>
+                        {days !== null ? (
+                          <StatusBadge days={days} />
+                        ) : (
+                          <Badge className="bg-gray-100 text-gray-400 hover:bg-gray-100 text-xs border-0">
+                            No date
+                          </Badge>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {subscriptions.length > 5 && (
+                    <div className="px-5 py-3">
+                      <Link
+                        href="/dashboard/subscriptions"
+                        className="text-xs text-blue-600 hover:underline font-medium"
+                      >
+                        +{subscriptions.length - 5} more subscriptions
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right: Sidebar panels */}
@@ -343,7 +520,9 @@ export default function DashboardPage() {
                   <TrendingUp className="w-4 h-4 text-blue-200" />
                   <span className="text-sm font-bold">Free Plan</span>
                 </div>
-                <p className="text-blue-200 text-xs mb-1">{vehicles.length} of {FREE_LIMIT} vehicles</p>
+                <p className="text-blue-200 text-xs mb-1">
+                  {vehicles.length} of {FREE_LIMIT} vehicles
+                </p>
                 <Progress value={vehiclePercent} className="h-1.5 mb-4 bg-blue-500/40" />
                 <p className="text-xs text-blue-200 leading-relaxed mb-4">
                   Upgrade for unlimited vehicles, Telegram alerts, and cloud document storage.
@@ -367,21 +546,33 @@ export default function DashboardPage() {
               </div>
               <div className="p-4">
                 {comingUp.length === 0 ? (
-                  <p className="text-xs text-gray-400 text-center py-4">No renewals in the next 90 days</p>
+                  <p className="text-xs text-gray-400 text-center py-4">
+                    No renewals in the next 90 days
+                  </p>
                 ) : (
                   <div className="space-y-3">
                     {comingUp.map((item) => {
                       const dotColor =
-                        item.days <= 7 ? "bg-red-500" : item.days <= 30 ? "bg-yellow-500" : "bg-green-500";
+                        item.days <= 7
+                          ? "bg-red-500"
+                          : item.days <= 30
+                          ? "bg-yellow-500"
+                          : "bg-green-500";
                       return (
                         <div key={item.key} className="flex items-center gap-3">
                           <div className={`w-2 h-2 rounded-full flex-shrink-0 ${dotColor}`} />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs text-gray-700 truncate font-medium">{item.type}</p>
-                            <p className="text-[10px] text-gray-400 font-mono">{item.plate}</p>
+                            <p className="text-xs text-gray-700 truncate font-medium">
+                              {item.label}
+                            </p>
+                            <p className="text-[10px] text-gray-400 truncate">{item.sublabel}</p>
                           </div>
                           <span className="text-xs text-gray-400 whitespace-nowrap font-semibold">
-                            {item.days === 0 ? "Today" : item.days === 1 ? "Tomorrow" : `${item.days}d`}
+                            {item.days === 0
+                              ? "Today"
+                              : item.days === 1
+                              ? "Tomorrow"
+                              : `${item.days}d`}
                           </span>
                         </div>
                       );
@@ -399,14 +590,27 @@ export default function DashboardPage() {
                   href="/dashboard/vehicles"
                   className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-blue-50 hover:text-blue-700 transition-colors group"
                 >
-                  <span className="text-xs font-medium text-gray-700 group-hover:text-blue-700">Add new vehicle</span>
+                  <span className="text-xs font-medium text-gray-700 group-hover:text-blue-700">
+                    Add new vehicle
+                  </span>
                   <ArrowRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-600" />
+                </Link>
+                <Link
+                  href="/dashboard/subscriptions"
+                  className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-indigo-50 hover:text-indigo-700 transition-colors group"
+                >
+                  <span className="text-xs font-medium text-gray-700 group-hover:text-indigo-700">
+                    Add subscription / bill
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-600" />
                 </Link>
                 <Link
                   href="/dashboard/reminders"
                   className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-blue-50 hover:text-blue-700 transition-colors group"
                 >
-                  <span className="text-xs font-medium text-gray-700 group-hover:text-blue-700">View all reminders</span>
+                  <span className="text-xs font-medium text-gray-700 group-hover:text-blue-700">
+                    View all reminders
+                  </span>
                   <ArrowRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-600" />
                 </Link>
                 <Link
