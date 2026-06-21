@@ -79,12 +79,10 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-gray-50 flex w-full overflow-x-hidden">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      <div
+        className={`fixed inset-0 bg-black/40 z-30 lg:hidden transition-opacity duration-200 ${sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        onClick={() => setSidebarOpen(false)}
+      />
 
       <div className="flex-1 min-w-0 flex flex-col min-h-screen lg:ml-64">
         <header className="h-14 bg-white border-b border-gray-100 flex items-center px-4 sm:px-6 sticky top-0 z-20 gap-3">

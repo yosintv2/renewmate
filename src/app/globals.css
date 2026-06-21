@@ -75,6 +75,22 @@ body {
   max-width: 100vw;
 }
 
+/* Eliminate 300ms tap delay on all interactive elements */
+a, button, [role="button"], input, select, textarea, label {
+  touch-action: manipulation;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Immediate press feedback — felt instantly on touch */
+button:active {
+  opacity: 0.72;
+  transform: scale(0.97);
+  transition: opacity 50ms linear, transform 50ms linear !important;
+}
+
 @layer base {
   h1, h2, h3, h4, h5, h6 {
     font-weight: 700;

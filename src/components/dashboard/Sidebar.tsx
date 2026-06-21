@@ -116,7 +116,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-100 flex flex-col z-40 transition-transform duration-300 ease-in-out",
+        "fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-100 flex flex-col z-40 transition-transform duration-200 ease-out will-change-transform",
         "lg:translate-x-0",
         open ? "translate-x-0" : "-translate-x-full"
       )}

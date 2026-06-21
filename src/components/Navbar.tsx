@@ -103,8 +103,8 @@ export default function Navbar() {
       {/* Mobile menu */}
       <div
         className={cn(
-          "md:hidden bg-white border-b border-gray-100 overflow-hidden transition-all duration-300",
-          open ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+          "md:hidden bg-white border-b border-gray-100 overflow-hidden transition-all duration-150",
+          open ? "max-h-[360px] opacity-100" : "max-h-0 opacity-0"
         )}
       >
         <div className="px-4 py-4 space-y-1">
