@@ -1,17 +1,17 @@
 import Link from "next/link";
-import { Shield } from "lucide-react";
+import { Shield, Mail, MessageCircle } from "lucide-react";
 
 const footerLinks = {
   Product: [
-    { href: "#features", label: "Features" },
-    { href: "#pricing", label: "Pricing" },
-    { href: "/changelog", label: "Changelog" },
-    { href: "/roadmap", label: "Roadmap" },
+    { href: "/#features", label: "Features" },
+    { href: "/#pricing", label: "Pricing" },
+    { href: "/blog", label: "Blog" },
+    { href: "/#faq", label: "FAQ" },
   ],
   Company: [
     { href: "/about", label: "About" },
-    { href: "/blog", label: "Blog" },
     { href: "/contact", label: "Contact" },
+    { href: "/changelog", label: "Changelog" },
   ],
   Legal: [
     { href: "/privacy", label: "Privacy Policy" },
@@ -22,10 +22,11 @@ const footerLinks = {
 export default function Footer() {
   return (
     <footer className="bg-gray-950 text-gray-400">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+          {/* Brand */}
           <div className="col-span-2">
-            <Link href="/" className="flex items-center gap-2 font-bold text-xl mb-4">
+            <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl mb-4">
               <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
                 <Shield className="w-4 h-4 text-white" />
               </div>
@@ -33,14 +34,28 @@ export default function Footer() {
                 Renew<span className="text-blue-400">Mate</span>
               </span>
             </Link>
-            <p className="text-sm leading-relaxed max-w-xs">
-              Nepal&apos;s trusted vehicle renewal reminder platform. Never pay a late fee again.
+            <p className="text-sm text-gray-500 leading-relaxed max-w-xs mb-5">
+              Nepal&apos;s trusted vehicle renewal reminder platform. Never pay a late fee again. Track tax, bluebook, insurance, and pollution test for all your vehicles.
             </p>
-            <p className="text-xs mt-4 text-gray-600">
-              Built with care in Nepal 🇳🇵
-            </p>
+            <div className="flex items-center gap-3">
+              <a
+                href="mailto:hello@renewmate.com"
+                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
+                aria-label="Email us"
+              >
+                <Mail className="w-4 h-4" />
+              </a>
+              <a
+                href="https://t.me/renewmate"
+                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
+                aria-label="Telegram"
+              >
+                <MessageCircle className="w-4 h-4" />
+              </a>
+            </div>
           </div>
 
+          {/* Links */}
           {Object.entries(footerLinks).map(([section, links]) => (
             <div key={section}>
               <h4 className="text-white font-semibold text-sm mb-4">{section}</h4>
@@ -49,7 +64,7 @@ export default function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm hover:text-white transition-colors"
+                      className="text-sm text-gray-500 hover:text-gray-200 transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -60,11 +75,16 @@ export default function Footer() {
           ))}
         </div>
 
+        {/* Bottom bar */}
         <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-xs">
-            © {new Date().getFullYear()} RenewMate. All rights reserved.
-          </p>
-          <p className="text-xs">Never Miss a Renewal.</p>
+          <div className="flex items-center gap-4">
+            <p className="text-xs text-gray-600">
+              © {new Date().getFullYear()} RenewMate. All rights reserved.
+            </p>
+            <span className="text-gray-700 text-xs hidden sm:inline">·</span>
+            <p className="text-xs text-gray-600 hidden sm:inline">Built with care in Nepal 🇳🇵</p>
+          </div>
+          <p className="text-xs text-gray-600 italic">Never Miss a Renewal.</p>
         </div>
       </div>
     </footer>

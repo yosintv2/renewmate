@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +20,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Car, Plus, Edit2, Trash2, Loader2, AlertCircle } from "lucide-react";
+import { Car, Plus, Edit2, Trash2, Loader2, AlertCircle, Bike, Truck } from "lucide-react";
 
 type Vehicle = {
   id: string;
@@ -49,26 +48,29 @@ function daysUntil(dateStr: string | null): number | null {
 }
 
 function RenewalChip({ label, days }: { label: string; days: number | null }) {
-  if (days === null)
+  if (days === null) {
     return (
-      <div className="rounded-lg border px-2.5 py-1.5 bg-gray-50 border-gray-100">
-        <p className="text-[10px] font-medium text-gray-400 mb-0.5">{label}</p>
-        <p className="text-xs font-bold text-gray-300">N/A</p>
+      <div className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg bg-gray-50 border border-gray-100">
+        <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wide">{label}</p>
+        <p className="text-[11px] font-bold text-gray-300">N/A</p>
       </div>
     );
+  }
 
-  const color =
+  const classes =
     days < 0
-      ? "bg-red-100 text-red-700 border-red-200"
+      ? "bg-red-50 border-red-200 text-red-700"
+      : days <= 7
+      ? "bg-red-50 border-red-200 text-red-700"
       : days <= 15
-      ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-      : "bg-green-100 text-green-700 border-green-200";
+      ? "bg-yellow-50 border-yellow-200 text-yellow-700"
+      : "bg-green-50 border-green-200 text-green-700";
 
   return (
-    <div className={`rounded-lg border px-2.5 py-1.5 ${color}`}>
-      <p className="text-[10px] font-medium mb-0.5 opacity-70">{label}</p>
-      <p className="text-xs font-bold">
-        {days < 0 ? "Expired" : days === 0 ? "Today" : days === 1 ? "Tomorrow" : `${days}d`}
+    <div className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg border ${classes}`}>
+      <p className="text-[9px] font-semibold uppercase tracking-wide opacity-70">{label}</p>
+      <p className="text-[11px] font-bold">
+        {days < 0 ? "Expired" : days === 0 ? "Today" : days === 1 ? "1d" : `${days}d`}
       </p>
     </div>
   );
@@ -84,16 +86,17 @@ const VEHICLE_TYPE_LABELS: Record<string, string> = {
   other: "Other",
 };
 
-const NEPAL_PROVINCES = [
-  "Koshi",
-  "Madhesh",
-  "Bagmati",
-  "Gandaki",
-  "Lumbini",
-  "Karnali",
-  "Sudurpashchim",
-];
+const VEHICLE_TYPE_ICONS: Record<string, React.ElementType> = {
+  bike: Bike,
+  scooter: Bike,
+  car: Car,
+  jeep: Car,
+  van: Truck,
+  truck: Truck,
+  other: Car,
+};
 
+const NEPAL_PROVINCES = ["Koshi", "Madhesh", "Bagmati", "Gandaki", "Lumbini", "Karnali", "Sudurpashchim"];
 const VEHICLE_TYPES = ["bike", "scooter", "car", "jeep", "van", "truck", "other"];
 
 type FormData = {
@@ -142,10 +145,7 @@ export default function VehiclesPage() {
   const fetchVehicles = useCallback(async () => {
     setLoading(true);
     const supabase = createClient();
-    const { data } = await supabase
-      .from("vehicles")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data } = await supabase.from("vehicles").select("*").order("created_at", { ascending: false });
     if (data) setVehicles(data);
     setLoading(false);
   }, []);
@@ -183,7 +183,7 @@ export default function VehiclesPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }
 
-  async function handleSave(e: React.FormEvent) {
+  async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!formData.vehicle_number || !formData.vehicle_type || !formData.province) {
       setFormError("Vehicle number, type, and province are required.");
@@ -208,24 +208,14 @@ export default function VehiclesPage() {
     const supabase = createClient();
     let err;
     if (editVehicle) {
-      ({ error: err } = await supabase
-        .from("vehicles")
-        .update(payload)
-        .eq("id", editVehicle.id));
+      ({ error: err } = await supabase.from("vehicles").update(payload).eq("id", editVehicle.id));
     } else {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      ({ error: err } = await supabase
-        .from("vehicles")
-        .insert({ ...payload, user_id: user!.id }));
+      const { data: { user } } = await supabase.auth.getUser();
+      ({ error: err } = await supabase.from("vehicles").insert({ ...payload, user_id: user!.id }));
     }
 
     setSaving(false);
-    if (err) {
-      setFormError(err.message);
-      return;
-    }
+    if (err) { setFormError(err.message); return; }
     setModalOpen(false);
     await fetchVehicles();
   }
@@ -233,26 +223,22 @@ export default function VehiclesPage() {
   async function handleDelete(id: string) {
     const supabase = createClient();
     const { error } = await supabase.from("vehicles").delete().eq("id", id);
-    if (!error) {
-      setVehicles((prev) => prev.filter((v) => v.id !== id));
-    }
+    if (!error) setVehicles((prev) => prev.filter((v) => v.id !== id));
     setDeleteId(null);
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Vehicles</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            {loading
-              ? "Loading..."
-              : `${vehicles.length} vehicle${vehicles.length !== 1 ? "s" : ""} tracked`}
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Vehicles</h1>
+          <p className="text-gray-500 text-sm mt-0.5">
+            {loading ? "Loading..." : `${vehicles.length} vehicle${vehicles.length !== 1 ? "s" : ""} tracked`}
           </p>
         </div>
         <Button
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2"
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2 shadow-md shadow-blue-200 self-start sm:self-auto"
           onClick={openAddModal}
         >
           <Plus className="w-4 h-4" />
@@ -269,16 +255,14 @@ export default function VehiclesPage() {
 
       {/* Empty state */}
       {!loading && vehicles.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center py-16 sm:py-24 text-center">
           <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
             <Car className="w-7 h-7 text-gray-400" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">No vehicles yet</h3>
-          <p className="text-sm text-gray-500 mb-6">
-            Add your first vehicle to start tracking renewal dates.
-          </p>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">No vehicles yet</h3>
+          <p className="text-sm text-gray-500 mb-6 max-w-xs">Add your first vehicle to start tracking renewal dates.</p>
           <Button
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2"
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl gap-2 shadow-md shadow-blue-200"
             onClick={openAddModal}
           >
             <Plus className="w-4 h-4" />
@@ -289,7 +273,7 @@ export default function VehiclesPage() {
 
       {/* Vehicle grid */}
       {!loading && vehicles.length > 0 && (
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
           {vehicles.map((v) => {
             const renewalDays = {
               tax: daysUntil(v.tax_expiry),
@@ -297,94 +281,88 @@ export default function VehiclesPage() {
               insurance: daysUntil(v.insurance_expiry),
               pollution: daysUntil(v.pollution_expiry),
             };
-            const validDays = Object.values(renewalDays).filter(
-              (d): d is number => d !== null
-            );
+            const validDays = Object.values(renewalDays).filter((d): d is number => d !== null);
             const worstDays = validDays.length ? Math.min(...validDays) : null;
+
             const borderColor =
               worstDays === null || worstDays > 15
-                ? "border-gray-100"
-                : worstDays < 0
-                ? "border-red-200"
-                : "border-yellow-200";
+                ? "border-gray-100 hover:border-gray-200"
+                : worstDays < 0 || worstDays <= 7
+                ? "border-red-200 hover:border-red-300"
+                : "border-yellow-200 hover:border-yellow-300";
+
+            const VehicleIcon = VEHICLE_TYPE_ICONS[v.vehicle_type] || Car;
 
             return (
-              <Card
+              <div
                 key={v.id}
-                className={`border shadow-sm hover:shadow-md transition-shadow ${borderColor}`}
+                className={`bg-white rounded-2xl border ${borderColor} shadow-sm hover:shadow-md transition-all p-5`}
               >
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
-                        <Car className="w-5 h-5 text-gray-600" />
-                      </div>
-                      <div>
-                        <p className="font-mono font-bold text-gray-900">{v.vehicle_number}</p>
-                        <p className="text-xs text-gray-500">
-                          {[
-                            v.year,
-                            v.brand,
-                            v.model,
-                            VEHICLE_TYPE_LABELS[v.vehicle_type],
-                          ]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </p>
-                      </div>
+                {/* Vehicle header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+                      <VehicleIcon className="w-5 h-5 text-gray-500" />
                     </div>
-                    <Badge className="text-[10px] bg-gray-100 text-gray-600 hover:bg-gray-100 border-0">
-                      {v.province}
-                    </Badge>
+                    <div>
+                      <p className="font-mono font-bold text-gray-900 text-base">{v.vehicle_number}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {[v.year, v.brand, v.model].filter(Boolean).join(" ")}
+                        {v.brand || v.model ? ` · ${VEHICLE_TYPE_LABELS[v.vehicle_type]}` : VEHICLE_TYPE_LABELS[v.vehicle_type]}
+                      </p>
+                    </div>
                   </div>
+                  <Badge className="text-[10px] bg-gray-100 text-gray-500 hover:bg-gray-100 border-0 font-semibold">
+                    {v.province}
+                  </Badge>
+                </div>
 
-                  <div className="grid grid-cols-4 gap-2 mb-4">
-                    <RenewalChip label="Tax" days={renewalDays.tax} />
-                    <RenewalChip label="Bluebook" days={renewalDays.bluebook} />
-                    <RenewalChip label="Insurance" days={renewalDays.insurance} />
-                    <RenewalChip label="Pollution" days={renewalDays.pollution} />
-                  </div>
+                {/* Renewal chips */}
+                <div className="grid grid-cols-4 gap-1.5 mb-4">
+                  <RenewalChip label="Tax" days={renewalDays.tax} />
+                  <RenewalChip label="Book" days={renewalDays.bluebook} />
+                  <RenewalChip label="Ins." days={renewalDays.insurance} />
+                  <RenewalChip label="Poll." days={renewalDays.pollution} />
+                </div>
 
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="flex-1 h-8 text-xs border-gray-200 gap-1.5"
-                      onClick={() => openEditModal(v)}
-                    >
-                      <Edit2 className="w-3 h-3" />
-                      Edit
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="flex-1 h-8 text-xs border-gray-200 gap-1.5 text-red-500 hover:text-red-600 hover:border-red-200"
-                      onClick={() => setDeleteId(v.id)}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      Remove
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 h-8 text-xs border-gray-200 gap-1.5 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors"
+                    onClick={() => openEditModal(v)}
+                  >
+                    <Edit2 className="w-3 h-3" />
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1 h-8 text-xs border-gray-200 gap-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors"
+                    onClick={() => setDeleteId(v.id)}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Remove
+                  </Button>
+                </div>
+              </div>
             );
           })}
 
           {/* Add card */}
-          <Card
-            className="border-2 border-dashed border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer group shadow-none"
+          <button
             onClick={openAddModal}
+            className="bg-white border-2 border-dashed border-gray-200 rounded-2xl hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer group min-h-[180px] flex flex-col items-center justify-center gap-2 p-5"
           >
-            <CardContent className="p-5 flex flex-col items-center justify-center h-full min-h-[200px]">
-              <div className="w-12 h-12 rounded-2xl bg-gray-100 group-hover:bg-blue-100 flex items-center justify-center mb-3 transition-colors">
-                <Plus className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
-              </div>
-              <p className="font-semibold text-gray-500 group-hover:text-blue-600 text-sm transition-colors">
-                Add a vehicle
-              </p>
-              <p className="text-xs text-gray-400 mt-1">Track its renewals automatically</p>
-            </CardContent>
-          </Card>
+            <div className="w-12 h-12 rounded-2xl bg-gray-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+              <Plus className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
+            </div>
+            <p className="font-semibold text-sm text-gray-500 group-hover:text-blue-600 transition-colors">
+              Add a vehicle
+            </p>
+            <p className="text-xs text-gray-400">Track its renewals automatically</p>
+          </button>
         </div>
       )}
 
@@ -392,7 +370,7 @@ export default function VehiclesPage() {
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="sm:max-w-lg max-h-[92vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editVehicle ? "Edit Vehicle" : "Add New Vehicle"}</DialogTitle>
+            <DialogTitle className="text-lg">{editVehicle ? "Edit Vehicle" : "Add New Vehicle"}</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSave} className="space-y-4 mt-1">
@@ -408,7 +386,7 @@ export default function VehiclesPage() {
                 <Label className="text-sm font-medium text-gray-700">Vehicle Number *</Label>
                 <Input
                   placeholder="BA 1 JA 1234"
-                  className="mt-1.5 h-10 border-gray-200 uppercase"
+                  className="mt-1.5 h-10 border-gray-200 uppercase font-mono"
                   value={formData.vehicle_number}
                   onChange={(e) => updateField("vehicle_number", e.target.value)}
                   required
@@ -417,18 +395,13 @@ export default function VehiclesPage() {
 
               <div>
                 <Label className="text-sm font-medium text-gray-700">Vehicle Type *</Label>
-                <Select
-                  value={formData.vehicle_type}
-                  onValueChange={(v) => updateField("vehicle_type", v)}
-                >
+                <Select value={formData.vehicle_type} onValueChange={(v) => updateField("vehicle_type", v)}>
                   <SelectTrigger className="mt-1.5 h-10 border-gray-200">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
                     {VEHICLE_TYPES.map((t) => (
-                      <SelectItem key={t} value={t}>
-                        {VEHICLE_TYPE_LABELS[t]}
-                      </SelectItem>
+                      <SelectItem key={t} value={t}>{VEHICLE_TYPE_LABELS[t]}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -436,18 +409,13 @@ export default function VehiclesPage() {
 
               <div>
                 <Label className="text-sm font-medium text-gray-700">Province *</Label>
-                <Select
-                  value={formData.province}
-                  onValueChange={(v) => updateField("province", v)}
-                >
+                <Select value={formData.province} onValueChange={(v) => updateField("province", v)}>
                   <SelectTrigger className="mt-1.5 h-10 border-gray-200">
-                    <SelectValue placeholder="Select province" />
+                    <SelectValue placeholder="Province" />
                   </SelectTrigger>
                   <SelectContent>
                     {NEPAL_PROVINCES.map((p) => (
-                      <SelectItem key={p} value={p}>
-                        {p}
-                      </SelectItem>
+                      <SelectItem key={p} value={p}>{p}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -488,7 +456,7 @@ export default function VehiclesPage() {
             </div>
 
             <div className="border-t border-gray-100 pt-4">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
                 Renewal Dates
               </p>
               <div className="grid grid-cols-2 gap-4">
@@ -506,20 +474,11 @@ export default function VehiclesPage() {
               </div>
             </div>
 
-            <DialogFooter className="pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setModalOpen(false)}
-                disabled={saving}
-              >
+            <DialogFooter className="pt-2 gap-2">
+              <Button type="button" variant="outline" onClick={() => setModalOpen(false)} disabled={saving}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-                disabled={saving}
-              >
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={saving}>
                 {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                 {saving ? "Saving..." : editVehicle ? "Save changes" : "Add vehicle"}
               </Button>
@@ -528,20 +487,17 @@ export default function VehiclesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirmation dialog */}
+      {/* Delete dialog */}
       <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Remove vehicle?</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-500">
-            This will permanently delete the vehicle and all its renewal data. This action cannot
-            be undone.
+            This will permanently delete the vehicle and all its renewal data. This cannot be undone.
           </p>
-          <DialogFooter className="pt-2">
-            <Button variant="outline" onClick={() => setDeleteId(null)}>
-              Cancel
-            </Button>
+          <DialogFooter className="pt-2 gap-2">
+            <Button variant="outline" onClick={() => setDeleteId(null)}>Cancel</Button>
             <Button
               className="bg-red-600 hover:bg-red-700 text-white"
               onClick={() => deleteId && handleDelete(deleteId)}

@@ -3,178 +3,170 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { User, Bell, Shield, Trash2 } from "lucide-react";
+import { User, Bell, Shield, Trash2, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+
+const notificationToggles = [
+  { label: "30 days before renewal", enabled: true },
+  { label: "15 days before renewal", enabled: true },
+  { label: "7 days before renewal", enabled: true },
+  { label: "3 days before renewal", enabled: true },
+  { label: "1 day before renewal", enabled: true },
+];
+
+function Toggle({ enabled }: { enabled: boolean }) {
+  return (
+    <div
+      className={`relative w-9 h-5 rounded-full flex items-center transition-colors cursor-pointer flex-shrink-0 ${enabled ? "bg-blue-600" : "bg-gray-300"}`}
+    >
+      <div
+        className={`absolute w-4 h-4 rounded-full bg-white shadow-sm transition-all ${enabled ? "translate-x-4" : "translate-x-0.5"}`}
+      />
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-500 text-sm mt-1">Manage your account and preferences</p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Settings</h1>
+        <p className="text-gray-500 text-sm mt-0.5">Manage your account and preferences</p>
       </div>
 
-      <div className="max-w-2xl space-y-6">
+      <div className="max-w-2xl space-y-5">
         {/* Profile */}
-        <Card className="border-gray-100 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <User className="w-4 h-4 text-gray-400" />
-              Profile
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-50">
+            <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
+              <User className="w-3.5 h-3.5 text-blue-600" />
+            </div>
+            <span className="font-semibold text-gray-900 text-sm">Profile</span>
+          </div>
+          <div className="p-5">
             <div className="flex items-center gap-4 mb-6">
-              <Avatar className="w-16 h-16">
-                <AvatarFallback className="bg-blue-100 text-blue-600 text-xl font-bold">RS</AvatarFallback>
-              </Avatar>
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+                RS
+              </div>
               <div>
-                <p className="font-semibold text-gray-900">Ramesh Shrestha</p>
+                <p className="font-bold text-gray-900">Ramesh Shrestha</p>
                 <p className="text-sm text-gray-500">ramesh@example.com</p>
-                <Badge className="mt-1 bg-gray-100 text-gray-600 hover:bg-gray-100 text-xs">
+                <span className="inline-block text-[10px] font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full mt-1">
                   Free plan
-                </Badge>
+                </span>
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
                 <Label htmlFor="name" className="text-sm font-medium text-gray-700">Full name</Label>
-                <Input
-                  id="name"
-                  defaultValue="Ramesh Shrestha"
-                  className="mt-1.5 border-gray-200"
-                />
+                <Input id="name" defaultValue="Ramesh Shrestha" className="mt-1.5 border-gray-200 h-10" />
               </div>
               <div>
                 <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  defaultValue="ramesh@example.com"
-                  className="mt-1.5 border-gray-200"
-                />
+                <Input id="email" type="email" defaultValue="ramesh@example.com" className="mt-1.5 border-gray-200 h-10" />
               </div>
               <div>
                 <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
-                  Phone number <span className="text-gray-400 font-normal">(optional)</span>
+                  Phone <span className="text-gray-400 font-normal">(optional)</span>
                 </Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+977 98xxxxxxxx"
-                  className="mt-1.5 border-gray-200"
-                />
+                <Input id="phone" type="tel" placeholder="+977 98xxxxxxxx" className="mt-1.5 border-gray-200 h-10" />
               </div>
             </div>
 
-            <Button className="mt-6 bg-blue-600 hover:bg-blue-700 text-white">
+            <Button className="mt-5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md shadow-blue-200">
               Save changes
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Notifications */}
-        <Card className="border-gray-100 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <Bell className="w-4 h-4 text-gray-400" />
-              Notification preferences
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-5">
-              {[
-                { label: "30 days before renewal", enabled: true },
-                { label: "15 days before renewal", enabled: true },
-                { label: "7 days before renewal", enabled: true },
-                { label: "3 days before renewal", enabled: true },
-                { label: "1 day before renewal", enabled: true },
-              ].map((item) => (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-50">
+            <div className="w-7 h-7 rounded-lg bg-yellow-50 flex items-center justify-center">
+              <Bell className="w-3.5 h-3.5 text-yellow-600" />
+            </div>
+            <span className="font-semibold text-gray-900 text-sm">Notification preferences</span>
+          </div>
+          <div className="p-5">
+            <div className="space-y-4">
+              {notificationToggles.map((item) => (
                 <div key={item.label} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-700">{item.label}</span>
-                  <div className={`w-9 h-5 rounded-full flex items-center transition-colors cursor-pointer ${
-                    item.enabled ? "bg-blue-600 justify-end" : "bg-gray-300 justify-start"
-                  }`}>
-                    <div className="w-4 h-4 rounded-full bg-white shadow-sm mx-0.5" />
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
+                    <span className="text-sm text-gray-700">{item.label}</span>
                   </div>
+                  <Toggle enabled={item.enabled} />
                 </div>
               ))}
             </div>
 
             <Separator className="my-5" />
 
-            <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-              <p className="text-sm font-semibold text-blue-900 mb-1">
-                Telegram notifications
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl p-4">
+              <p className="text-white text-sm font-bold mb-1">Telegram notifications</p>
+              <p className="text-blue-200 text-xs mb-3">
+                Connect your Telegram account to receive reminders instantly in chat.
               </p>
-              <p className="text-xs text-blue-600 mb-3">
-                Connect your Telegram account to receive reminders instantly.
-              </p>
-              <Button size="sm" variant="outline" className="text-xs h-8 border-blue-200 text-blue-700 hover:bg-blue-100">
-                Connect Telegram — Premium
-              </Button>
+              <Link
+                href="/dashboard/billing"
+                className="inline-block text-xs font-semibold bg-white text-blue-700 hover:bg-blue-50 py-1.5 px-3 rounded-lg transition-colors"
+              >
+                Upgrade to enable Telegram →
+              </Link>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Security */}
-        <Card className="border-gray-100 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold text-gray-900 flex items-center gap-2">
-              <Shield className="w-4 h-4 text-gray-400" />
-              Security
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-50">
+            <div className="w-7 h-7 rounded-lg bg-green-50 flex items-center justify-center">
+              <Shield className="w-3.5 h-3.5 text-green-600" />
+            </div>
+            <span className="font-semibold text-gray-900 text-sm">Security</span>
+          </div>
+          <div className="p-5">
             <div className="space-y-4">
               <div>
                 <Label htmlFor="current-password" className="text-sm font-medium text-gray-700">
                   Current password
                 </Label>
-                <Input
-                  id="current-password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="mt-1.5 border-gray-200"
-                />
+                <Input id="current-password" type="password" placeholder="••••••••" className="mt-1.5 border-gray-200 h-10" />
               </div>
               <div>
                 <Label htmlFor="new-password" className="text-sm font-medium text-gray-700">
                   New password
                 </Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  placeholder="At least 8 characters"
-                  className="mt-1.5 border-gray-200"
-                />
+                <Input id="new-password" type="password" placeholder="At least 8 characters" className="mt-1.5 border-gray-200 h-10" />
               </div>
             </div>
-            <Button variant="outline" className="mt-4 border-gray-200">
+            <Button variant="outline" className="mt-5 border-gray-200 rounded-xl">
               Update password
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Danger zone */}
-        <Card className="border-red-200 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold text-red-600 flex items-center gap-2">
-              <Trash2 className="w-4 h-4" />
-              Danger zone
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="bg-white rounded-2xl border border-red-200 shadow-sm overflow-hidden">
+          <div className="flex items-center gap-2 px-5 py-4 border-b border-red-100">
+            <div className="w-7 h-7 rounded-lg bg-red-50 flex items-center justify-center">
+              <Trash2 className="w-3.5 h-3.5 text-red-500" />
+            </div>
+            <span className="font-semibold text-red-600 text-sm">Danger zone</span>
+          </div>
+          <div className="p-5">
             <p className="text-sm text-gray-500 mb-4">
               Once you delete your account, all your vehicles, reminders, and documents will be permanently deleted. This cannot be undone.
             </p>
-            <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300">
+            <Button
+              variant="outline"
+              className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 rounded-xl"
+            >
               Delete account
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
