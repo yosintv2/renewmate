@@ -84,6 +84,17 @@ button {
   cursor: pointer;
 }
 
+/* Hide injected counter widgets (waust.at, supercounters) — admin-only stats */
+div[id^="wau"], div[id^="_wau"], div[id*="wau_c"],
+a[href*="waust.at"], a[href*="supercounters.com"],
+img[src*="waust.at"], img[src*="supercounters.com"],
+iframe[src*="waust.at"], iframe[src*="supercounters.com"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* Immediate press feedback — felt instantly on touch */
 button:active {
   opacity: 0.72;
