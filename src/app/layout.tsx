@@ -58,12 +58,8 @@ export default function RootLayout({
         {children}
         {/* Stats counters — hidden from view, sitewide */}
         <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "1px", overflow: "hidden", visibility: "hidden", zIndex: -1 }}>
-          <Script src="https://widget.supercounters.com/ssl/online_i.js" strategy="afterInteractive" />
-          <Script id="sc-online-init" strategy="afterInteractive">
-            {`sc_online_i(1714446,"ffffff","ffffff");`}
-          </Script>
-          <Script id="wau-init" strategy="afterInteractive">
-            {`var _wau = _wau || []; _wau.push(["sjphoi7xt1", "sjphoi7xt1", "9qe", "c4302bffffff", "small"]);`}
+          <Script id="_wau3rc" strategy="afterInteractive">
+            {`var _wau = _wau || []; _wau.push(["dynamic", "zwdie24w8h", "3rc", "c4302bffffff", "small"]);`}
           </Script>
           <Script src="https://waust.at/d.js" strategy="afterInteractive" />
         </div>
