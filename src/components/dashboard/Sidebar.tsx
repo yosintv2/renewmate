@@ -12,6 +12,7 @@ import {
   X,
   ChevronRight,
   Tv,
+  Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -43,6 +44,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const router = useRouter();
   const [userName, setUserName] = useState("...");
   const [subCount, setSubCount] = useState(0);
+  const [billCount, setBillCount] = useState(0);
   const [alertCount, setAlertCount] = useState(0);
   const [initials, setInitials] = useState("?");
   const [avatarColor, setAvatarColor] = useState("bg-blue-500");
@@ -54,7 +56,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       const supabase = createClient();
       const [{ data: authData }, { data: subs }, { data: profile }] = await Promise.all([
         supabase.auth.getUser(),
-        supabase.from("subscriptions").select("next_billing_date"),
+        supabase.from("subscriptions").select("next_billing_date, category"),
         supabase.from("profiles").select("name").single(),
       ]);
 
@@ -76,7 +78,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       setAvatarColor(colors[colorIdx]);
 
       if (subs) {
-        setSubCount(subs.length);
+        const subCats = ["entertainment", "tech", "lifestyle"];
+        const billCats = ["living", "financial", "other"];
+        setSubCount(subs.filter(s => subCats.includes(s.category ?? "")).length);
+        setBillCount(subs.filter(s => billCats.includes(s.category ?? "")).length);
         const alerts = subs.filter((s) => {
           const d = daysUntil(s.next_billing_date);
           return d !== null && d <= 7;
@@ -101,6 +106,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       label: "Subscriptions",
       icon: Tv,
       badge: subCount > 0 ? String(subCount) : undefined,
+      badgeVariant: "count",
+    },
+    {
+      href: "/dashboard/bills",
+      label: "Bills",
+      icon: Receipt,
+      badge: billCount > 0 ? String(billCount) : undefined,
       badgeVariant: "count",
     },
     {

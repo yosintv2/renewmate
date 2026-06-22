@@ -97,10 +97,10 @@ button:active {
     letter-spacing: -0.02em;
   }
 
-  /* Prevent iOS Safari auto-zoom on input focus (triggered when font-size < 16px) */
+  /* Prevent iOS Safari auto-zoom on input focus — must beat Tailwind text-sm (14px) */
   @media (max-width: 768px) {
     input, select, textarea {
-      font-size: 16px;
+      font-size: 16px !important;
     }
   }
 }
